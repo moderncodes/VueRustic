@@ -1,0 +1,42 @@
+version: '3.9'
+
+volumes:
+  client:
+
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: client
+    container_name: client
+    volumes:
+      - ./client:/client
+      - /client/node_modules
+
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+    networks:
+      - allSystemsGo
+
+  nginx:
+    build:
+      context: ./.nginx
+      dockerfile: Dockerfile
+    image: nginx
+    volumes:
+      - ./.nginx/sites-available/dev.conf:/etc/nginx/conf.d/default.conf
+      - ./client:/client
+    ports:
+      - "8080:80"
+    depends_on:
+      - client
+    networks:
+      - allSystemsGo
+
+networks:
+  allSystemsGo:
+    driver: bridge
