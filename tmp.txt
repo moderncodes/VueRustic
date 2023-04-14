@@ -1,0 +1,26 @@
+podman pod create --name vuerastic_dev -p 8080:80
+podman build -t client "./client"
+podman build -t nginx "./.nginx"
+
+# This command runs a container with the following options:
+# - Detached mode
+# - Attach the container to the "vuerastic_dev" pod
+# - Name the container "client-c"
+# - Mount the host directory to the container's working directory
+podman run -dt \
+	--pod vuerastic_dev \
+	--name client-dev \
+	-v $(pwd)/client:/home/alfa/client \
+	client
+
+
+
+
+podman run -dt --pod vuerastic_dev --name nginx-dev -e APP_ENV=development nginx
+podman run -dt --pod vuerastic_dev --name nginx-c -e APP_ENV=production nginx
+
+podman run -dt --pod new:nginx -p 5173:5173 quay.io/libpod/node:lts
+
+
+podman pod rm vuerastic_dev --force
+podman volume rm my_node_modules
